@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>CMPE-282 Cloud Services</title>
+<link type="text/css" rel="stylesheet"
+	href="../assets/css/bootstrap.css" />
+</head>
+
+<body background="../assets/img/music1.jpg">
+
+	<div class="container">
+		<h1 style="color:white">
+			<a href="#">Music Recommendation Engine</a>
+		</h1>
+
+		<div class="navbar">
+			<div class="navbar-inner">
+				<div class="container">
+					<ul class="nav">
+						<li class="active"><a href="../index.html">My Music</a></li>
+						<li class="active span6"></li>
+						
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+	<!--  	<img src="../assets/img/cloudServices.jpg" class="span5" />  -->
+		<!-- h1><a href="#">CMPE 282 Cloud Services</a></h1>
+	
+	<h1 class="span2"><a href="SignIn.html">Sign In</a></h1>
+	<h3><a href="#">My Cart</a></h3-->
+
+		<form class="well span6" onsubmit="return false;">
+			<input type="text" id="userName" class="span3" placeholder="Username" required/>
+			<input type="password" id="passwd" class="span3"
+				placeholder="Password"  required/>
+			<button class="btn btn-primary" id="login" onclick="LogInfun()">Login</button>
+			
+		</form>
+	</div>
+
+	<script src="../assets/js/bootstrap.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
+	<!--  script src="../assets/js/signIn.js"></script> -->
+
+	<script type="text/javascript">
+	
+	//$(document).ready(function(){
+	//	
+	//})
+	
+function LogInfun(){
+
+	var URL = "http://localhost:8080/CloudServices/rest/users/signin";
+	//alert("signin button clicked");//+formToJSON());
+	
+	$.ajax({
+			type: "POST",
+			url: URL,
+			contentType: "application/json",
+			dataType: 'json',
+			data : formToJSON(),
+				//success: function () { //success(data); }
+			success: function(data, textStatus, jqXHR){
+				
+				var msg=data.authid;
+				alert("message from response "+msg);
+				if(msg!="unauthorized transaction")
+					{
+					 alert("inside whatever"+msg);
+					 window.location.replace("http://localhost:8080/CloudServices/view/estore.html?authid="+msg);
+					}
+				else{
+					alert("Unable to sign in");
+				}
+			}
+			,
+			error: function(textStatus, jqXHR,errorThrown){
+				alert(textStatus+" "+jqXHR);
+			}
+
+		});
+}
+
+function formToJSON() {
+    return JSON.stringify({
+    "email": $('#userName').val(),
+    "passwd": $('#passwd').val(),
+    });
+}
+	</script>
+
+</body>
+</html>

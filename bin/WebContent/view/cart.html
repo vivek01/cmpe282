@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8" />
+
+<!-- Set the viewport width to device width for mobile -->
+<meta name="viewport" content="width=device-width" />
+
+<title style=color:#3B5998>Cloud EStore</title>
+
+<link rel="stylesheet" href="../assets/css/normalize.css">
+<link rel="stylesheet" href="../assets/css/foundation.css">
+<script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
+<script src="../assets/js/vendor/custom.modernizr.js"></script>
+<script>
+	function validateForm() {
+		var x = document.forms["nortonBuy"]["n360"].value;
+		if (x > 0) {
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+</script>
+<script language="JavaScript">
+	var l;
+	function processUser() {
+		var parameters = location.search.substring(1).split("&");
+		alert("inside process user");
+		var temp = parameters[0].split("=");
+		l = unescape(temp[1]);
+		alert(l);
+		user(l);
+		cartview();
+
+	}
+
+	function user(l) {
+
+		var URL = "http://ec2-54-172-52-250.compute-1.amazonaws.com:8080/CloudServices/rest/users/session";
+		alert("signin button clicked" + formToJSON(l));
+
+		$.ajax({
+			type : "POST",
+			url : URL,
+			contentType : "application/json",
+			dataType : 'json',
+			data : formToJSON(l),
+			//success: function () { //success(data); }
+			success : function(data, textStatus, jqXHR) {
+
+				var msg = data.msg;
+				alert(data.msg)
+				document.getElementById("final").style.fontSize = "xx-large";
+				document.getElementById("final").style.fontWeight = 'bold';
+				document.getElementById("final").innerHTML = "Welcome " + msg;
+				alert(msg);
+			},
+			error : function(textStatus, jqXHR, errorThrown) {
+				alert(textStatus + " " + jqXHR);
+			}
+
+		});
+	}
+	function formToJSON(l) {
+		return JSON.stringify({
+			"authId" : l
+		});
+	}
+
+	function getSessionJSON() {
+		return JSON.stringify({
+			"sessionId" : l
+		});
+	}
+	function cartview() {
+		var cartURL = "http://ec2-54-172-52-250.compute-1.amazonaws.com:8080/CloudServices/rest/catalog/cart/view";
+		//
+
+		alert("json for fetching cart info " + formToJSON(l))
+
+		$.ajax({
+			type : "POST",
+			url : cartURL,
+			contentType : "application/json",
+			dataType : 'json',
+			data : formToJSON(l),
+			//success: function () { //success(data); }
+			success : function(json, textStatus, jqXHR) {
+				var length = json.product.length;
+				alert(length);
+				var ele = new Array();
+				var docFrag = document.createDocumentFragment();
+				for (index = 0; index < length; index++) {
+					alert(index + json.product[index].name
+							+ json.product[index].id
+							+ json.product[index].price)
+					ele[index] = createDiv(index, json.product[index].name,
+							json.product[index].id, json.product[index].price);
+				}
+
+				for (k = 0; k < ele.length; k++) {
+					docFrag.appendChild(ele[k]);
+				}
+				document.getElementById("contain").appendChild(docFrag);
+			}
+
+			,
+			error : function(textStatus, jqXHR, errorThrown) {
+				alert(textStatus + " " + jqXHR);
+			}
+
+		});
+
+	}
+
+	function box(msg) {
+		var str = msg.getAttribute("custom");
+		alert(str + l);
+
+		var addURL = "http://ec2-54-172-52-250.compute-1.amazonaws.com:8080/CloudServices/rest/catalog/cart";
+
+		$
+				.ajax({
+					type : "DELETE",
+					url : addURL,
+					contentType : "application/json",
+					dataType : 'json',
+					data : idToJSON(str),
+					//success: function () { //success(data); }
+					success : function(data, textStatus, jqXHR) {
+						if (data.msg == "Successfully removed product from the cart")
+							window.location
+									.replace("http://ec2-54-172-52-250.compute-1.amazonaws.com:8080/CloudServices/view/cart.html?authid="
+											+ l);
+
+					},
+					error : function(textStatus, jqXHR, errorThrown) {
+						alert(textStatus + " " + jqXHR);
+					}
+
+				});
+
+	}
+
+	function idToJSON(pid) {
+		return JSON.stringify({
+			"sessionId" : l,
+			"productId" : pid
+		});
+	}
+	function createDiv(count, item, uid, cost) {//document.getElementById("contain").appendChild(newDiv);
+
+		var newDiv = document.createElement('div');
+		newDiv.setAttribute("class", "row");
+		newDiv.setAttribute("id", "main" + count);
+		//alert("inside the id" + count)
+		var in1 = document.createElement("div");
+		in1.setAttribute("class", "large-12 columns");
+		in1.setAttribute("id", "In1" + count);
+
+		var in2 = document.createElement("div");
+		in2.setAttribute("class", "row");
+		in2.setAttribute("id", "inner" + count);
+
+		var in3 = document.createElement("div");
+		in3.setAttribute("class", "large-3 columns");
+		in3.setAttribute("id", "name" + count);
+		in3.innerHTML = item;
+
+		var in4 = document.createElement("div");
+		in4.setAttribute("class", "large-3 columns");
+		in4.setAttribute("id", "ID" + count);
+		in4.innerHTML = uid;
+
+		var in5 = document.createElement("div");
+		in5.setAttribute("class", "large-3 columns");
+		in5.setAttribute("id", "Price" + count);
+		in5.innerHTML = cost;
+		var temp = in5.getAttribute("id");
+		//alert("after price")
+		//alert(temp)
+		var i = document.createElement("input")
+		i.setAttribute("type", "submit");
+		i.setAttribute("class", "small button centered");
+		i.setAttribute("value", "Remove from cart")
+		i.setAttribute("custom", uid)
+		i.setAttribute("onclick", "box(this)")
+		i.setAttribute("id", "button" + count)
+		var temp1 = i.getAttribute("id");
+		//alert("after input")
+		//alert(temp1)
+		//Merging them together
+		//document.getElementById("contain").appendChild(newDiv);
+		//document.getElementById("main" + count).appendChild(in1);
+		newDiv.appendChild(in1)
+		//alert("main added")
+		in1.appendChild(in2);
+		in2.appendChild(in3);
+		in2.appendChild(in4);
+		in2.appendChild(in5);
+		in2.appendChild(i);
+		/*document.getElementById("In1" + count).appendChild(in2);
+		document.getElementById("inner" + count).appendChild(in3);
+		document.getElementById("inner" + count).appendChild(in4);
+		document.getElementById("inner" + count).appendChild(in5);
+		document.getElementById("inner" + count).appendChild(i);*/
+		//	alert("all elements added")
+		return newDiv;
+
+	}
+	
+	function purchaseRedirect()
+	{
+		window.location.replace("http://ec2-54-172-52-250.compute-1.amazonaws.com:8080/CloudServices/view/Purchase.html?authid="+ l);
+	}
+	
+	function historyRedirect()
+	{
+		window.location.replace("http://ec2-54-172-52-250.compute-1.amazonaws.com:8080/CloudServices/view/History.html?authid="+ l);
+	}
+	
+	function lastRedirect()
+	{
+		window.location.replace("http://ec2-54-172-52-250.compute-1.amazonaws.com:8080/CloudServices/view/Last.html?authid="+ l);
+	}
+</script>
+<!-- onload="processUser()" -->
+</head>
+<body onload="processUser()" class="off-canvas hide-extras">
+	<div class="row">
+		<div class="large-12 columns">
+
+			<!-- Navigation -->
+			<div class="fixed">
+				<nav class="top-bar">
+					<ul class="title-area">
+						<!-- Title Area -->
+						<li class="name">
+							<h1>
+								<a href="home.html"> <img src="../img/macpro.jpg"
+									style="max-height: 80px; max-width: 80px">
+								</a>
+							</h1>
+						</li>
+						<li class="toggle-topbar menu-icon"><a href=#><span>Menu</span></a></li>
+					</ul>
+
+					<section class="top-bar-section">
+
+						<ul class="left">
+							
+							<li class="divider"></li>
+						
+							<li class="divider"></li>
+							<li id="bu2" class="has-button"><input type="submit"
+								class="medium button centered" value="Purchase"
+								onclick="purchaseRedirect()"></li>
+							<li class="divider"></li>
+							<li id="bu3" class="has-button"><input type="submit"
+								class="medium button centered" value="History"
+								onclick="historyRedirect()"></li>
+							<li id="bu4" class="has-button"><input type="submit"
+								class="medium button centered" value="Last Login"
+								onclick="lastRedirect()()"></li>
+						</ul>
+						</ul>
+
+						<ul class="right">
+
+
+
+							<li class="divider"></li>
+							<li id="bu" class="has-button"><a id="bu"
+								class="button round" href="logout.html">Sign Out</a></li>
+						</ul>
+					</section>
+				</nav>
+			</div>
+			<!-- End Navigation -->
+
+		</div>
+	</div>
+	<!-- End of first row -->
+	<!--start of second row-->
+	<div class="row">
+		<div class="large-2 columns">
+			<br> <br>
+			<div id="final"></div>
+		</div>
+
+		<div class="large-10 columns">
+			<div class="row">
+				<h3 align="center" style="color: #0099FF">
+					<b><i>EStore Products</i></b>
+				</h3>
+			</div>
+			<div id="contain"></div>
+
+		</div>
+
+
+
+
+		<!-- Footer -->
+
+		<footer class="row">
+			<div class="large-12 columns">
+				<hr>
+				<div class="row">
+					<div class="large-6 columns">
+						<p>&copy; Copyright Estore 282</p>
+					</div>
+					<div class="large-6 columns"></div>
+				</div>
+			</div>
+		</footer>
+
+		<script>
+			document.write('<script src=../js/vendor/'
+					+ ('__proto__' in {} ? 'zepto' : 'jquery')
+					+ '.js><\/script>')
+		</script>
+		<script src="../assets/js/foundation.min.js"></script>
+		<script>
+			$(document).foundation();
+		</script>
+		<script type="text/javascript">
+			$(window).load(function() {
+				$('#featured').orbit({
+					fluid : '2x1'
+				});
+			});
+		</script>
+		<!-- End Footer -->
+</body>
+</html>

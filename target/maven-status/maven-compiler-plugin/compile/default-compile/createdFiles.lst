@@ -1,0 +1,6 @@
+edu\sjsu\cmpe282\sample\HelloWorld.class
+edu\sjsu\cmpe282\sample\JerseyRestService.class
+edu\sjsu\cmpe282\dto\UserDao.class
+edu\sjsu\cmpe282\sample\Student.class
+edu\sjsu\cmpe282\domain\User.class
+edu\sjsu\cmpe282\api\resources\UserResource.class
